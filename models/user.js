@@ -20,3 +20,11 @@ userSchema.pre('save', function(next) {
   });
 });
 
+// Compare password it has to be unique
+userSchema.methods.comparePassword = function(candidatePassword, cb) {
+  bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
+    if (err) return cb(err);
+    cb(null, isMatch);
+  });
+};
+
