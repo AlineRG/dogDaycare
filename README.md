@@ -15,6 +15,9 @@ Dog daycare is a platform designed to simplify pet care management for dog dayca
 
 Dog DayCare offers a variety of features to simplify and enhance the management of a dog daycare.
 
+- **Express.js** backend
+- **Handlebars** (HBS) for templating
+
 # Previous_requirements
 
 Before running the project, make sure you have the following software and tools installed:
