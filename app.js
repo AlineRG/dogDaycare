@@ -25,7 +25,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 //Passport config
 app.use(session({
-  secret: 'keyboard cat',
+  secret: 'hi',
   resave: false,
   saveUninitialized: true,
 }));
@@ -42,7 +42,7 @@ app.get('/', (req, res) => {
 });
 
 //Passport config login
-app.post('index',passport.authenticate('local',{
+app.post('/index',passport.authenticate('local',{
   successRedirect: '/home',
   failureRedirect: '/index',
   }));
