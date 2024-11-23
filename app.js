@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose'); //Connection to mongoose
+var User = require('./models/user'); 
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
