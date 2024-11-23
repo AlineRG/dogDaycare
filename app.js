@@ -78,7 +78,7 @@ app.get('/', (req, res) => {
 //Passport config login
 app.post('/',passport.authenticate('local',{
   successRedirect: '/home',
-  failureRedirect: '/index',
+  failureRedirect: '/',
   }));
 
 // catch 404 and forward to error handler
