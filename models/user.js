@@ -8,3 +8,15 @@ var userSchema = new Schema({
   password: { type: String, required: true }
 });
 
+// Encripte password
+userSchema.pre('save', function(next) {
+  var user = this;
+  if (!user.isModified('password')) return next();
+
+  bcrypt.hash(user.password, 10, function(err, hashedPassword) {
+    if (err) return next(err);
+    user.password = hashedPassword;
+    next();
+  });
+});
+
