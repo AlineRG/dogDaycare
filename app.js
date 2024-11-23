@@ -37,6 +37,39 @@ app.use(passport.session());
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
+//Login and register config
+app.get('/login',(req, res) =>{
+  res.render('index')
+})
+
+app.get('/register',(req, res) =>{
+  res.render('index')
+})
+
+app.post('/login', passport.authenticate('local', {
+  successRedirect: '/home',
+  failureRedirect: '/login',
+  failureFlash: true
+}));
+
+app.post('/register', (req, res) => {
+  User.create({ username: req.body.username, password: req.body.password })
+    .then(user => {
+      res.redirect('/home');
+    })
+    .catch(err => {
+      res.send('Error registering user: ' + err);
+    });
+});
+
+app.get('/home', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.send("Welcome to the Home Page!");
+  } else {
+    res.redirect('/login');
+  }
+});
+
 //New route for landing page
 app.get('/', (req, res) => {
   res.send("Welcome to Dog DayCare!");
