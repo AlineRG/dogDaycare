@@ -76,7 +76,7 @@ app.get('/', (req, res) => {
 });
 
 //Passport config login
-app.post('/index',passport.authenticate('local',{
+app.post('/',passport.authenticate('local',{
   successRedirect: '/home',
   failureRedirect: '/index',
   }));
