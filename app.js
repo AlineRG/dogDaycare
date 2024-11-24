@@ -75,7 +75,7 @@ app.post('/register', (req, res) => {
 
 app.get('/home', (req, res) => {
   if (req.isAuthenticated()) {
-    res.send("Welcome to Dog DayCare!");
+    res.render('home');
   } else {
     res.redirect('/login');
   }
