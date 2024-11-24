@@ -107,4 +107,34 @@ mongoose.connect(configurations.ConnectionStrings.MongoDB, { useNewUrlParser: tr
   .then(() => console.log('Successful Connection to mongoose'))
   .catch((err) => console.error('Error Connections a MongoDB:', err));
 
+// Configuration Passport local strategy
+passport.use(new LocalStrategy((username, password, done) => {
+  User.findOne({ username: username })
+    .then(user => {
+      if (!user) {
+        return done(null, false, { message: 'Incorrect username' });
+      }
+      user.comparePassword(password, (err, isMatch) => {
+        if (err) return done(err);
+        if (!isMatch) {
+          return done(null, false, { message: 'Incorrect password' });
+        }
+        return done(null, user);
+      });
+    })
+    .catch(err => done(err));
+}));
+
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async function(id, done) {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err);
+  }
+});
 
