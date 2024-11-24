@@ -67,7 +67,7 @@ app.post('/register', (req, res) => {
 
 app.get('/home', (req, res) => {
   if (req.isAuthenticated()) {
-    res.send("Welcome to the Home Page!");
+    res.send("Welcome to Dog DayCare!");
   } else {
     res.redirect('/login');
   }
