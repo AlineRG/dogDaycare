@@ -153,3 +153,11 @@ router.get('/pets', (req, res) => {
 });
 
 // Route for reservations
+router.get('/reservations', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.render('reservations'); 
+  } else {
+    res.redirect('/login'); 
+  }
+});
+
