@@ -6,6 +6,7 @@ var logger = require('morgan');
 var mongoose = require('mongoose'); //Connection to mongoose
 var User = require('./models/user'); 
 var LocalStrategy = require('passport-local').Strategy; //To login and register with form
+var router = express.Router();
 
 
 var indexRouter = require('./routes/index');
