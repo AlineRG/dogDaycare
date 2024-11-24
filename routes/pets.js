@@ -3,8 +3,8 @@ var router = express.Router();
 
 
 // GET /pets
-router.get("/pets", AuthenticationMiddleware, (req, res, next) => {
-    res.render("pets", { title: "Add a new pet" , user: req.user });
-  });
+router.get("/", (req, res, next) => {
+    res.render("pets", { title: "Add a new pet", user: req.user });
+});
 
 module.exports = router;
