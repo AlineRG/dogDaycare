@@ -47,6 +47,7 @@ app.use(passport.session());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/pets', isAuthenticated, petsRouter);
 
 //Login and register config
 app.get('/login',(req, res) =>{
