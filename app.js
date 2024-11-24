@@ -12,6 +12,7 @@ var petsRouter = require('./routes/pets');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var reservationsRouter = require('./routes/reservations');
 
 // Passport config
 var passport = require('passport');
@@ -48,6 +49,7 @@ app.use(passport.session());
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/pets', isAuthenticated, petsRouter);
+app.use('/reservations', isAuthenticated, reservationsRouter);
 
 //Login and register config
 app.get('/login',(req, res) =>{
@@ -150,16 +152,6 @@ function isAuthenticated(req, res, next) {
   res.redirect('/login');
 }
 
-
-
-// Route for reservations
-router.get('/reservations', (req, res) => {
-  if (req.isAuthenticated()) {
-    res.render('reservations'); 
-  } else {
-    res.redirect('/login'); 
-  }
-});
 
 // Route for logout
 app.get('/logout', (req, res, next) => {
