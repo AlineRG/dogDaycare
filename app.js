@@ -8,7 +8,7 @@ var User = require('./models/user');
 var LocalStrategy = require('passport-local').Strategy; //To login and register with form
 var router = express.Router();
 var { engine } = require('express-handlebars');
-
+var petsRouter = require('./routes/pets');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
