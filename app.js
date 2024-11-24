@@ -141,9 +141,15 @@ passport.deserializeUser(async function(id, done) {
   }
 });
 
-// Route for Pets
+
+function isAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
+    return next();
   }
+  res.redirect('/login');
+}
+
+
 
 // Route for reservations
 router.get('/reservations', (req, res) => {
