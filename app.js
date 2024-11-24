@@ -86,12 +86,6 @@ app.get('/', (req, res) => {
   res.send("Welcome to Dog DayCare!");
 });
 
-//Passport config login
-app.post('/',passport.authenticate('local',{
-  successRedirect: '/home',
-  failureRedirect: '/',
-  }));
-
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
