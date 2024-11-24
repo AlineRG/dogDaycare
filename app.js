@@ -104,7 +104,6 @@ module.exports = app;
 
 //Mongoose 
 var configurations = require('./configs/globals');
-
 mongoose.connect(configurations.ConnectionStrings.MongoDB, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Successful Connection to mongoose'))
   .catch((err) => console.error('Error Connections a MongoDB:', err));
