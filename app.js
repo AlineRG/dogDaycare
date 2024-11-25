@@ -8,6 +8,7 @@ var User = require('./models/user');
 var LocalStrategy = require('passport-local').Strategy; //To login and register with form
 var router = express.Router();
 var { engine } = require('express-handlebars');
+var Handlebars = require('handlebars');
 var petsRouter = require('./routes/pets');
 
 var indexRouter = require('./routes/index');
@@ -29,11 +30,27 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-//Handlebar configuration
 app.engine('hbs', engine({
   extname: '.hbs',
+//Handlebars is a template engine that allows to create dynamic HTML views in the Node.js application.
+  handlebars: Handlebars,
   defaultLayout: false,
+  helpers: {
+// This helper is called "eq" (short for "equal"). It checks if two values are the same.
+    eq: function (a, b) {  
+      return a === b;
+    },
+// This helper "json." It converts any data (like an object or array) into a JSON string.
+    json: function(context) {
+      return JSON.stringify(context, null, 2);
+    }
+  }
 }));
+
+Handlebars.registerHelper('json', function(context) {
+  return JSON.stringify(context, null, 2);
+});
+
 app.set('view engine', 'hbs');
 
 //Passport config
@@ -163,7 +180,3 @@ app.get('/logout', (req, res, next) => {
     });
   });
 });
-
-
-
-
