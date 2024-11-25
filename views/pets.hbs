@@ -3,13 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pet information</title>
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="/stylesheets/pets.css">
 </head>
 <body>
-    <form
-        action="/pets" method="POST">
-        <input type="text" name="name" placeholder="Pet Name" required />
-        <button type="submit">Add Pet</button>
-    </form>
+    <h1>{{title}}</h1>
+
+    {{#if error}}
+        <p class="error" role="alert">{{error}}</p>
+    {{/if}}
+
+{{#if (eq action "list")}}
+    <a href="/pets/new" class="btn btn-primary">Add new pet</a>
+    {{#if pets.length}}
+        <ul class="pet-list">
+            {{#each pets}}
+                <li class="pet-item">
+                    <div class="pet-info">
+                        <p><strong>Name:</strong> {{this.name}}</p>
+                        <p><strong>Breed:</strong> {{this.species}}</p>
+                        {{#if this.breed}}
+                            <p><strong>Color:</strong> {{this.breed}}</p>
+                        {{/if}}
+                        {{#if this.age}}
+                            <p><strong>Age:</strong> {{this.age}} years</p>
+                        {{/if}}
+                    </div>
+                    <div class="pet-actions">
+                        <a href="/pets/{{this._id}}/edit" class="btn btn-edit">Edit</a>
+                        <form action="/pets/{{this._id}}/delete" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm(' Are you sure to delete this pet?');">Delete</button>
+                        </form>
+                    </div>
+                </li>
+            {{/each}}
+        </ul>
+    {{else}}
+        <p>No register pets</p>
+    {{/if}}
+{{/if}}
+
+    {{#if (eq action "new")}}
+        <form action="/pets" method="POST" class="pet-form">
+            {{> petForm}}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Add pet</button>
+                <a href="/pets" class="btn">Cancel</a>
+            </div>
+        </form>
+    {{/if}}
+
+    {{#if (eq action "edit")}}
+        <form action="/pets/{{pet._id}}" method="POST" class="pet-form">
+            {{> petForm pet=pet}}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Update pet information</button>
+                <a href="/pets" class="btn">Cancel</a>
+            </div>
+        </form>
+    {{/if}}
+
+    {{!-- Partial for pet form --}}
+    {{#*inline "petForm"}}
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" value="{{pet.name}}" required>
+        </div>
+        <div class="form-group">
+            <label for="species">Breed:</label>
+            <input type="text" id="species" name="species" value="{{pet.species}}" required>
+        </div>
+        <div class="form-group">
+            <label for="breed">Color:</label>
+            <input type="text" id="breed" name="breed" value="{{pet.breed}}">
+        </div>
+        <div class="form-group">
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" value="{{pet.age}}">
+        </div>
+    {{/inline}}
 </body>
 </html>
