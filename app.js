@@ -168,3 +168,8 @@ function isAuthenticated(req, res, next) {
   }
   res.redirect('/login');
 }
+
+//Link from pet page to home page
+app.get('/home', (req, res) => {
+  res.render('home', { title: 'Home' });
+});
