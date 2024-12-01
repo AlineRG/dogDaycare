@@ -19,11 +19,11 @@ const petSchema = new mongoose.Schema({
     type: Number,
     min: 0
   },
-  UserId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User', 
-    required: true 
-  }
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+}
 }, {
   timestamps: true
 });
