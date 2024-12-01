@@ -47,10 +47,15 @@
                         {{#if this.age}}
                             <p><strong>Age:</strong> {{this.age}} years</p>
                         {{/if}}
-                    </div>
-                    <div class="pet-actions">
-                        <a href="/pets/{{this._id}}/edit" class="btn btn-edit">Edit</a>
-                        <form action="/pets/{{this._id}}/delete" method="POST" style="display:inline;">
+                            <p><strong>Sex:</strong> {{this.sex}}</p>
+                            <p><strong>Neutered:</strong> {{#if this.neutered}}Yes{{else}}No{{/if}}</p>
+                            {{#if this.weight}}
+                                <p><strong>Weight:</strong> {{this.weight}} kg</p>
+                            {{/if}}
+                        </div>
+                        <div class="pet-actions">
+                            <a href="/pets/{{this._id}}/edit" class="btn btn-edit">Edit</a>
+                            <form action="/pets/{{this._id}}/delete" method="POST" style="display:inline;">
                             <button type="submit" class="btn btn-danger" onclick="return confirm(' Are you sure to delete this pet?');">Delete</button>
                         </form>
                     </div>
@@ -58,9 +63,9 @@
             {{/each}}
         </ul>
     {{else}}
-        <p>No register pets</p>
+            <p>No pets registered yet</p>
+        {{/if}}
     {{/if}}
-{{/if}}
 
     {{#if (eq action "new")}}
         <form action="/pets" method="POST" class="pet-form">
