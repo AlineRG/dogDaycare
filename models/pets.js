@@ -19,6 +19,19 @@ const petSchema = new mongoose.Schema({
     type: Number,
     min: 0
   },
+  sex: {
+    type: String,
+    enum: ['Male', 'Female', 'Unknown'],
+    default: 'Unknown'
+  },
+  neutered: {
+    type: Boolean,
+    default: false
+  },
+  weight: {
+    type: Number,
+    min: 0
+  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

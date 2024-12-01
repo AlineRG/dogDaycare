@@ -19,7 +19,7 @@ router.get('/', isAuthenticated, async (req, res) => {
       
       res.render('pets', { 
         pets, 
-        title: 'Register pets',
+        title: 'Pets information',
         action: 'list',
         user: req.user
       });
@@ -42,6 +42,9 @@ router.post('/', isAuthenticated, async (req, res) => {
       breed: req.body.breed,
       color: req.body.color,
       age: req.body.age,
+      sex: req.body.sex,
+      neutered: req.body.neutered === 'true',
+      weight: req.body.weight,
       userId: req.user._id
     });
     
@@ -114,7 +117,10 @@ router.post('/:id', isAuthenticated, async (req, res) => {
           name: req.body.name,
           breed: req.body.breed,
           color: req.body.color,
-          age: req.body.age
+          age: req.body.age,
+          sex: req.body.sex,
+          neutered: req.body.neutered === 'true',
+          weight: req.body.weight
         },
         { new: true }
       );
