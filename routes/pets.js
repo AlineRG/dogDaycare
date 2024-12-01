@@ -14,7 +14,7 @@ function isAuthenticated(req, res, next) {
 // Route to list all pets
 router.get('/', isAuthenticated, async (req, res) => {
     try {
-      const pets = await Pet.find({ owner: req.user._id }).lean();
+      const pets = await Pet.find({ userId: req.user._id }).lean();
       console.log('Pets found:', pets);
       
       res.render('pets', { 
@@ -39,10 +39,10 @@ router.post('/', isAuthenticated, async (req, res) => {
   try {
     const newPet = new Pet({
       name: req.body.name,
-      species: req.body.species,
       breed: req.body.breed,
+      color: req.body.color,
       age: req.body.age,
-      owner: req.user._id
+      userId: req.user._id
     });
     
     console.log('Creating new pet:', newPet);
@@ -60,7 +60,7 @@ router.post('/', isAuthenticated, async (req, res) => {
 // Show pet details
 router.get('/:id', isAuthenticated, async (req, res) => {
   try {
-    const pet = await Pet.findOne({ _id: req.params.id, owner: req.user._id });
+    const pet = await Pet.findOne({ _id: req.params.id, userId: req.user._id });
     if (!pet) {
       return res.status(404).render('pets', { error: 'Pet not found', action: 'list' });
     }
@@ -76,7 +76,7 @@ router.get('/:id/edit', isAuthenticated, async (req, res) => {
     try {
       const pet = await Pet.findOne({ 
         _id: req.params.id, 
-        owner: req.user._id 
+        userId: req.user._id 
       }).lean(); //Convert the Mongoose document to a plain JavaScript object to see information to edit
   
       if (!pet) {
@@ -108,7 +108,7 @@ router.post('/:id', isAuthenticated, async (req, res) => {
       const updatedPet = await Pet.findOneAndUpdate(
         { 
           _id: req.params.id, 
-          owner: req.user._id 
+          userId: req.user._id 
         },
         {
           name: req.body.name,
@@ -145,7 +145,7 @@ router.post('/:id/delete', isAuthenticated, async (req, res) => {
   }
 
   try {
-    const result = await Pet.findOneAndDelete({ _id: req.params.id, owner: req.user._id });
+    const result = await Pet.findOneAndDelete({ _id: req.params.id, userId: req.user._id });
     if (!result) {
       return res.status(404).render('pets', { error: 'Pet not found', action: 'list' });
     }
