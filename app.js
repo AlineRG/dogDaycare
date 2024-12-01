@@ -28,7 +28,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'))); //// Configure middleware to serve static files
 
 app.engine('hbs', engine({
   extname: '.hbs',
@@ -168,15 +168,3 @@ function isAuthenticated(req, res, next) {
   }
   res.redirect('/login');
 }
-
-
-// Route for logout
-app.get('/logout', (req, res, next) => {
-  req.logout((err) => {
-    if (err) return next(err);
-    req.session.destroy((err) => {
-      if (err) return next(err);
-      res.redirect('/');
-    });
-  });
-});

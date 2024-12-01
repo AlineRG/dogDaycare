@@ -13,6 +13,25 @@
         <p class="error" role="alert">{{error}}</p>
     {{/if}}
 
+{{!-- {{!-- 
+  Pet List Display Section
+  This section is responsible for rendering the list of pets on the main pets page.
+  
+  Key features:
+  1. Displays an "Add new pet" button at the top
+  2. Shows a list of all pets if any exist
+  3. For each pet, displays:
+     - Name
+     - Breed (stored in the 'breed' field)
+     - Color (if available, stored in the 'color' field)
+     - Age (if available)
+  4. Provides "Edit" and "Delete" buttons for each pet
+  5. Shows a message if no pets are registered
+  
+  This section is only rendered when the 'action' is set to "list"
+--}}
+
+
 {{#if (eq action "list")}}
     <a href="/pets/new" class="btn btn-primary">Add new pet</a>
     {{#if pets.length}}
@@ -21,9 +40,9 @@
                 <li class="pet-item">
                     <div class="pet-info">
                         <p><strong>Name:</strong> {{this.name}}</p>
-                        <p><strong>Breed:</strong> {{this.species}}</p>
+                        <p><strong>Breed:</strong> {{this.breed}}</p>
                         {{#if this.breed}}
-                            <p><strong>Color:</strong> {{this.breed}}</p>
+                            <p><strong>Color:</strong> {{this.color}}</p>
                         {{/if}}
                         {{#if this.age}}
                             <p><strong>Age:</strong> {{this.age}} years</p>
@@ -70,12 +89,12 @@
             <input type="text" id="name" name="name" value="{{pet.name}}" required>
         </div>
         <div class="form-group">
-            <label for="species">Breed:</label>
-            <input type="text" id="species" name="species" value="{{pet.species}}" required>
+            <label for="Breed">Breed:</label>
+            <input type="text" id="breed" name="breed" value="{{pet.breed}}" required>
         </div>
         <div class="form-group">
-            <label for="breed">Color:</label>
-            <input type="text" id="breed" name="breed" value="{{pet.breed}}">
+            <label for="color">Color:</label>
+            <input type="text" id="color" name="color" value="{{pet.color}}">
         </div>
         <div class="form-group">
             <label for="age">Age:</label>
