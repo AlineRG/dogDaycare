@@ -54,7 +54,7 @@
                     {{#each reservations}}
                         <li class="reservation-item">
                             <p><strong>Pet:</strong> {{this.pet.name}}</p>
-                            <p><strong>Date:</strong> {{this.date}}</p>
+                            <p><strong>Date:</strong> {{formatDate this.date}}</p>
                             <p><strong>Time:</strong> {{this.time}}</p>
                             {{#if this.notes}}
                                 <p><strong>Notes:</strong> {{this.notes}}</p>
