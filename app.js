@@ -100,7 +100,7 @@ app.post('/register', (req, res) => {
 
 app.get('/home', (req, res) => {
   if (req.isAuthenticated()) {
-    res.render('home');
+    res.render('home', { title: 'Home' });
   } else {
     res.redirect('/login');
   }
