@@ -3,11 +3,13 @@ const router = express.Router();
 const Reservation = require('../models/reservations');
 const Pet = require('../models/pets');
 
-router.get('/', async (req, res) => {
-    try {
-        console.log('User ID:', req.user._id);
-        const pets = await Pet.find({ userId: req.user._id }).lean();
-        console.log('Fetched pets:', pets);
+// Import the isAuthenticated middleware
+const isAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/login');
+};
 
         const reservations = await Reservation.find({ userId: req.user._id })
             .populate('pet')
