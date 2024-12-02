@@ -76,11 +76,11 @@ app.use('/reservations', isAuthenticated, reservationsRouter);
 //Login and register config
 app.get('/login',(req, res) =>{
   res.render('index')
-})
+});
 
 app.get('/register',(req, res) =>{
   res.render('index')
-})
+});
 
 app.post('/login', passport.authenticate('local', {
   successRedirect: '/home',
