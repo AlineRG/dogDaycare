@@ -1,8 +1,96 @@
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 2rem;
+  min-height: 100vh;
+  background-color: #ffe9da; /* Update 1: Changed background color */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-a {
-  color: #00B7FF;
+h1 {
+  color: #a18262;
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.auth-container {
+  display: flex;
+  justify-content: center;
+  gap: 4rem;
+  width: 100%;
+  max-width: 1200px;
+  padding: 1rem; /* Added padding */
+}
+
+form {
+  background: white; /* Update 2: Changed background color to white */
+  padding: 3rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  flex: 1;
+  max-width: 400px;
+}
+
+h2 {
+  color: #111827;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: #f3f4f6;
+  box-sizing: border-box;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border-color: #6366f1;
+  background-color: #fff;
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #a18262; /* Cambiado a marrón claro */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button[type="submit"]:hover {
+  background-color: #b69b80; /* Un tono más claro para el hover */
+}
+
+@media (max-width: 768px) {
+  .auth-container {
+      flex-direction: column;
+      align-items: center;
+  }
+
+  form {
+      width: 100%;
+      max-width: 300px;
+  }
 }
