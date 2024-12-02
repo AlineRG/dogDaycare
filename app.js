@@ -43,6 +43,15 @@ app.engine('hbs', engine({
 // This helper "json." It converts any data (like an object or array) into a JSON string.
     json: function(context) {
       return JSON.stringify(context, null, 2);
+    },
+    formatDate: function(date) {
+      return new Date(date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     }
   }
 }));
