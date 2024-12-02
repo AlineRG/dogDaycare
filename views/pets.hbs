@@ -42,14 +42,17 @@
             {{#each pets}}
                 <li class="pet-item">
                     <div class="pet-info">
-                        <p><strong>Name:</strong> {{this.name}}</p>
-                        <p><strong>Breed:</strong> {{this.breed}}</p>
-                        {{#if this.breed}}
-                            <p><strong>Color:</strong> {{this.color}}</p>
-                        {{/if}}
-                        {{#if this.age}}
-                            <p><strong>Age:</strong> {{this.age}} years</p>
-                        {{/if}}
+                        <div class="info-row">
+                            <p><strong>Name:</strong> {{this.name}}</p>
+                            <p><strong>Breed:</strong> {{this.breed}}</p>
+                            {{#if this.color}}
+                                <p><strong>Color:</strong> {{this.color}}</p>
+                            {{/if}}
+                            {{#if this.age}}
+                                <p><strong>Age:</strong> {{this.age}} years</p>
+                            {{/if}}
+                        </div>
+                        <div class="info-row">
                             <p><strong>Sex:</strong> {{this.sex}}</p>
                             <p><strong>Neutered:</strong> {{#if this.neutered}}Yes{{else}}No{{/if}}</p>
                             {{#if this.weight}}
