@@ -1,1 +1,182 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 2rem;
+    min-height: 100vh;
+    background-color: #ffe9da;
+}
+
+.nav-header {
+    margin-bottom: 2rem;
+}
+
+.home-link {
+    color: #a18262;
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+
+.home-link:hover {
+    text-decoration: underline;
+}
+
+h1 {
+    color: #a18262;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+}
+
+.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background-color: #a18262;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn:hover {
+    background-color: #b69b80;
+}
+
+.btn-primary {
+    background-color: #a18262;
+}
+
+.btn-edit {
+    background-color: white;
+    color: #a18262;
+    border: 2px solid #a18262;
+}
+
+.btn-edit:hover {
+    background-color: #a18262;
+    color: white;
+}
+
+.btn-danger {
+    background-color: white;
+    color: #d4b4a1;
+    border: 2px solid #d4b4a1;
+}
+
+.btn-danger:hover {
+    background-color: #d4b4a1;
+    color: white;
+}
+
+.pet-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.pet-item {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+}
+
+.pet-info {
+    flex-grow: 1;
+}
+
+.info-row {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.info-row p {
+    margin: 0;
+}
+
+.pet-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.pet-form {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #4a5568;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.radio-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 1rem;
+    }
+
+    .pet-item {
+        flex-direction: column;
+    }
+
+    .pet-actions {
+        margin-top: 1rem;
+        justify-content: flex-end;
+    }
+
+    .info-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
 
