@@ -7,11 +7,12 @@
     <link rel="stylesheet" href="/stylesheets/reservations.css">
 </head>
 <body>
-    <nav class="nav-header">
-        <a href="/home" class="home-link">← Back to Home</a>
-    </nav>
-    
-    <h1>{{title}}</h1>
+    <div class="reservation-container">
+        <nav class="nav-header">
+            <a href="/home" class="home-link">← Back to Home</a>
+        </nav>
+        
+        <h1>{{title}}</h1>
 
     {{#if error}}
         <p class="error" role="alert">{{error}}</p>
