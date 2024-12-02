@@ -47,12 +47,12 @@
             <button type="submit" class="btn btn-primary">Make Reservation</button>
         </form>
 
+        <h2>Your Reservations</h2>
         {{#if reservations.length}}
-            <div class="reservations-list">
-                <h2>Your Reservations</h2>
-                <ul>
-                    {{#each reservations}}
-                        <li class="reservation-item">
+            <ul class="reservations-list">
+                {{#each reservations}}
+                    <li class="reservation-item">
+                        <div class="reservation-info">
                             <p><strong>Pet:</strong> {{this.pet.name}}</p>
                             <p><strong>Date:</strong> {{formatDate this.date}}</p>
                             <p><strong>Time:</strong> {{this.time}}</p>
