@@ -11,23 +11,21 @@ const isAuthenticated = (req, res, next) => {
   res.redirect('/login');
 };
 
-        const reservations = await Reservation.find({ userId: req.user._id })
-            .populate('pet')
-            .lean();
-        
-        res.render('reservations', { 
-            title: 'Make a Reservation',
-            pets: pets,
-            reservations: reservations,
-            action: 'list'
-        });
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        res.status(500).render('reservations', { 
-            error: 'Error loading pets and reservations',
-            action: 'list'
-        });
-    }
+// GET all reservations
+router.get('/', isAuthenticated, async (req, res) => {
+  try {
+    const reservations = await Reservation.find({ userId: req.user._id }).populate('pet').lean();
+    const pets = await Pet.find({ userId: req.user._id }).lean();
+    res.render('reservations', { 
+      title: 'Reservations',
+      reservations,
+      pets,
+      action: 'list'
+    });
+  } catch (error) {
+    console.error('Error fetching reservations:', error);
+    res.status(500).render('reservations', { error: 'Error fetching reservations', action: 'list' });
+  }
 });
 
 // POST new reservation
