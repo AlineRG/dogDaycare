@@ -46,20 +46,29 @@ router.post('/', isAuthenticated, async (req, res) => {
   }
 });
 
-        await newReservation.save();
-        res.redirect('/reservations');
-    } catch (error) {
-        console.error('Error creating reservation:', error);
-        
-        const pets = await Pet.find({ userId: req.user._id }).lean();
-        
-        res.status(400).render('reservations', { 
-            title: 'Make a Reservation',
-            pets: pets,
-            error: 'Error creating reservation. Please try again.',
-            action: 'list'
-        });
+// DELETE reservation
+router.post('/:id/delete', isAuthenticated, async (req, res) => {
+  try {
+    const result = await Reservation.findOneAndDelete({ 
+      _id: req.params.id,
+      userId: req.user._id 
+    });
+    
+    if (!result) {
+      return res.status(404).render('reservations', { 
+        error: 'Reservation not found',
+        action: 'list'
+      });
     }
+    
+    res.redirect('/reservations');
+  } catch (error) {
+    console.error('Error deleting reservation:', error);
+    res.status(500).render('reservations', { 
+      error: 'Error deleting reservation',
+      action: 'list'
+    });
+  }
 });
 
 module.exports = router;
