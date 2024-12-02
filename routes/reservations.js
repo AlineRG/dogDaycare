@@ -29,15 +29,22 @@ router.get('/', isAuthenticated, async (req, res) => {
 });
 
 // POST new reservation
-router.post('/', async (req, res) => {
-    try {
-        const newReservation = new Reservation({
-            pet: req.body.pet,
-            userId: req.user._id,
-            date: req.body.date,
-            time: req.body.time,
-            notes: req.body.notes
-        });
+router.post('/', isAuthenticated, async (req, res) => {
+  try {
+    const newReservation = new Reservation({
+      pet: req.body.pet,
+      userId: req.user._id,
+      date: req.body.date,
+      time: req.body.time,
+      notes: req.body.notes
+    });
+    await newReservation.save();
+    res.redirect('/reservations');
+  } catch (error) {
+    console.error('Error creating reservation:', error);
+    res.status(400).render('reservations', { error: 'Error creating reservation', action: 'list' });
+  }
+});
 
         await newReservation.save();
         res.redirect('/reservations');
