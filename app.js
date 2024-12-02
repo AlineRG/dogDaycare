@@ -127,8 +127,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
-
 //Mongoose 
 var configurations = require('./configs/globals');
 mongoose.connect(configurations.ConnectionStrings.MongoDB, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -174,7 +172,4 @@ function isAuthenticated(req, res, next) {
   res.redirect('/login');
 }
 
-//Link from pet page to home page
-app.get('/home', (req, res) => {
-  res.render('home', { title: 'Home' });
-});
+module.exports = app;
