@@ -56,10 +56,6 @@ app.engine('hbs', engine({
   }
 }));
 
-Handlebars.registerHelper('json', function(context) {
-  return JSON.stringify(context, null, 2);
-});
-
 app.set('view engine', 'hbs');
 
 //Passport config
