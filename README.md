@@ -140,7 +140,7 @@ router.post('/:id', isAuthenticated, async (req, res) => {
 });
 ```
 2. **views/pets.hbs**
-
+```
     {{#if error}}
         <p class="error" role="alert">{{error}}</p>
     {{/if}}
@@ -169,7 +169,7 @@ router.post('/:id', isAuthenticated, async (req, res) => {
             </div>
         </form>
     {{/if}}
-
+```
 3. **app.js**
 ```
 app.use(express.static(path.join(__dirname, 'public')));
