@@ -17,19 +17,23 @@ router.post('/register', async function(req, res, next) {
     return res.render('register', { message: 'Please enter all the fields' });
   }
 
-  // Create a new user
-  var newUser = new User({
-    username: username,
-    password: password
-  });
-
-  // Save user 
-  newUser.save(function(err) {
-    if (err) {
-      return res.render('register', { message: 'There was an error registering the user' });
+  try {
+    const existingUser = await User.findOne({ username: username });
+    if (existingUser) {
+      return res.render('register', { message: 'Username already exists' });
     }
-    res.redirect('/users/login');  // Redirect to login after registering
-  });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      username: username,
+      password: hashedPassword
+    });
+
+    await newUser.save();
+    res.redirect('/users/login');
+  } catch (err) {
+    res.render('register', { message: 'There was an error registering the user' });
+  }
 });
 
 // Route to show log in form
