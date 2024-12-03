@@ -4,7 +4,7 @@ var passport = require('passport');
 var User = require('../models/user');
 var bcrypt = require('bcryptjs');
 
-// Route to user model
+// Route to show registration form
 router.get('/register', function(req, res, next) {
   res.render('register');
 });
@@ -36,15 +36,24 @@ router.post('/register', async function(req, res, next) {
   }
 });
 
-// Route to show log in form
+// Route to show login form
 router.get('/login', function(req, res, next) {
   res.render('login');
 });
 
-// Route to log in 
+// Route for user login
 router.post('/login', passport.authenticate('local', {
-  successRedirect: '/home',   //Succesful login
-  failureRedirect: '/users/login',  // Fail login
+  successRedirect: '/home',
+  failureRedirect: '/users/login',
+  failureFlash: true
 }));
+
+// Route for user logout
+router.get('/logout', function(req, res, next) {
+  req.logout(function(err) {
+    if (err) { return next(err); }
+    res.redirect('/');
+  });
+});
 
 module.exports = router;
