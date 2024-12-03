@@ -71,7 +71,7 @@ Once the server is running, you can access the platform via a web browser and st
 - The form's action attribute is set to `/pets/{{pet._id}}`, which will submit the form to the correct update route.
 
 1. **route/pets/js**
-
+```
 // Show edit form
 router.get('/:id/edit', isAuthenticated, async (req, res) => {
   try {
@@ -138,7 +138,7 @@ router.post('/:id', isAuthenticated, async (req, res) => {
     });
   }
 });
-
+```
 2. **views/pets.hbs**
 
     {{#if error}}
@@ -171,7 +171,7 @@ router.post('/:id', isAuthenticated, async (req, res) => {
     {{/if}}
 
 3. **app.js**
-
+```
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.helpers = {
@@ -184,7 +184,7 @@ app.helpers = {
     return JSON.stringify(context, null, 2); // Converts context to JSON with 2-space indentation
   }
 }
-
+```
 
 ## The code about how to see the information in the pets page
 
@@ -206,7 +206,7 @@ In the Handlebars template:
 - Finally, I added an 'Add New Pet' button.
 
 1. **routes/pets.js**
-
+```
 const express = require('express');
 const router = express.Router();
 const Pet = require('../models/pet'); // Assuming you have a Pet model
@@ -238,9 +238,9 @@ router.get('/', isAuthenticated, async (req, res) => {
 });
 
 module.exports = router;
-
+```
 2. **views/pets.hbs**
-
+```
     {{#if error}}
         <p class="error" role="alert">{{error}}</p>
     {{/if}}
@@ -270,7 +270,7 @@ module.exports = router;
     {{/if}}
 </body>
 </html>
-
+```
 ## The code about how I put the pet names to appear in the dropdown menu in the reservations page:
 
 In the route (`reservations.js`):
