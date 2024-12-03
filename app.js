@@ -1,46 +1,38 @@
+require('dotenv').config();
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var mongoose = require('mongoose'); //Connection to mongoose
-var User = require('./models/user'); 
-var LocalStrategy = require('passport-local').Strategy; //To login and register with form
-var router = express.Router();
+var mongoose = require('mongoose');
+var User = require('./models/user');
+var LocalStrategy = require('passport-local').Strategy;
+var GitHubStrategy = require('passport-github2').Strategy;
 var { engine } = require('express-handlebars');
 var Handlebars = require('handlebars');
-var petsRouter = require('./routes/pets');
+var session = require('express-session');
+var passport = require('passport');
+var flash = require('connect-flash');
+var configurations = require('./configs/globals');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var petsRouter = require('./routes/pets');
 var reservationsRouter = require('./routes/reservations');
-
-// Passport config
-var passport = require('passport');
-var session = require('express-session')
+var authRouter = require('./routes/auth');
 
 var app = express();
 
-// view engine setup
+// View engine setup
 app.set('views', path.join(__dirname, 'views'));
-
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public'))); //// Configure middleware to serve static files
-
 app.engine('hbs', engine({
   extname: '.hbs',
-//Handlebars is a template engine that allows to create dynamic HTML views in the Node.js application.
   handlebars: Handlebars,
   defaultLayout: false,
   helpers: {
-// This helper is called "eq" (short for "equal"). It checks if two values are the same.
     eq: function (a, b) {  
       return a === b;
     },
-// This helper "json." It converts any data (like an object or array) into a JSON string.
     json: function(context) {
       return JSON.stringify(context, null, 2);
     },
@@ -55,85 +47,33 @@ app.engine('hbs', engine({
     }
   }
 }));
-
 app.set('view engine', 'hbs');
 
-//Passport config
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Session configuration
 app.use(session({
-  secret: 'hi',
+  secret: process.env.SESSION_SECRET || 'your secret here',
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
 }));
+
+// Flash messages
+app.use(flash());
+
+// Passport initialization
 app.use(passport.initialize());
 app.use(passport.session());
 
-
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/pets', isAuthenticated, petsRouter);
-app.use('/reservations', isAuthenticated, reservationsRouter);
-
-//Login and register config
-app.get('/login',(req, res) =>{
-  res.render('index')
-});
-
-app.get('/register',(req, res) =>{
-  res.render('index')
-});
-
-app.post('/login', passport.authenticate('local', {
-  successRedirect: '/home',
-  failureRedirect: '/login',
-  failureFlash: true
-}));
-
-app.post('/register', (req, res) => {
-  User.create({ username: req.body.username, password: req.body.password })
-    .then(user => {
-      res.redirect('/home');
-    })
-    .catch(err => {
-      res.send('Error registering user: ' + err);
-    });
-});
-
-app.get('/home', (req, res) => {
-  if (req.isAuthenticated()) {
-    res.render('home', { title: 'Home' });
-  } else {
-    res.redirect('/login');
-  }
-});
-
-//New route for landing page
-app.get('/', (req, res) => {
-  res.send("Welcome to Dog DayCare!");
-});
-
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
-
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
-
-//Mongoose 
-var configurations = require('./configs/globals');
-mongoose.connect(configurations.ConnectionStrings.MongoDB, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('Successful Connection to mongoose'))
-  .catch((err) => console.error('Error Connections a MongoDB:', err));
-
-// Configuration Passport local strategy
+// Passport Local Strategy
 passport.use(new LocalStrategy((username, password, done) => {
   User.findOne({ username: username })
     .then(user => {
@@ -151,6 +91,36 @@ passport.use(new LocalStrategy((username, password, done) => {
     .catch(err => done(err));
 }));
 
+// Passport GitHub Strategy
+passport.use(new GitHubStrategy({
+  clientID: configurations.Authentication.GitHub.ClientId,
+  clientSecret: configurations.Authentication.GitHub.ClientSecret,
+  callbackURL: configurations.Authentication.GitHub.CallbackURL
+},
+function(accessToken, refreshToken, profile, done) {
+  User.findOne({ githubId: profile.id })
+    .then(user => {
+      if (user) {
+        return done(null, user);
+      } else {
+        const newUser = new User({
+          username: profile.username,
+          githubId: profile.id,
+        });
+        newUser.save()
+          .then(user => {
+            done(null, user);
+          })
+          .catch(err => {
+            done(err);
+          });
+      }
+    })
+    .catch(err => {
+      done(err);
+    });
+}));
+
 passport.serializeUser(function(user, done) {
   done(null, user.id);
 });
@@ -164,12 +134,83 @@ passport.deserializeUser(async function(id, done) {
   }
 });
 
-
 function isAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     return next();
   }
   res.redirect('/login');
 }
+
+// Make user available to all routes
+app.use((req, res, next) => {
+  res.locals.user = req.user;
+  res.locals.error = req.flash('error');
+  res.locals.success = req.flash('success');
+  next();
+});
+
+// Routes
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+app.use('/auth', authRouter);
+app.use('/pets', isAuthenticated, petsRouter);
+app.use('/reservations', isAuthenticated, reservationsRouter);
+
+// Login and register routes
+app.get('/login', (req, res) => {
+  res.render('login', { message: req.flash('error') });
+});
+
+app.post('/login', passport.authenticate('local', {
+  successRedirect: '/home',
+  failureRedirect: '/login',
+  failureFlash: true
+}));
+
+app.get('/register', (req, res) => {
+  res.render('register');
+});
+
+app.post('/register', (req, res) => {
+  User.create({ username: req.body.username, password: req.body.password })
+    .then(user => {
+      res.redirect('/home');
+    })
+    .catch(err => {
+      res.send('Error registering user: ' + err);
+    });
+});
+
+// GitHub auth routes
+app.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
+
+app.get('/auth/github/callback', 
+  passport.authenticate('github', { failureRedirect: '/login' }),
+  function(req, res) {
+    res.redirect('/home');
+  }
+);
+
+app.get('/home', isAuthenticated, (req, res) => {
+  res.render('home', { title: 'Home', user: req.user });
+});
+
+// Catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
+});
+
+// Error handler
+app.use(function(err, req, res, next) {
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.status(err.status || 500);
+  res.render('error');
+});
+
+// MongoDB connection
+mongoose.connect(configurations.ConnectionStrings.MongoDB, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Successfully connected to MongoDB'))
+  .catch((err) => console.error('Error connecting to MongoDB:', err));
 
 module.exports = app;
