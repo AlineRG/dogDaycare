@@ -9,8 +9,8 @@ router.get('/register', function(req, res, next) {
   res.render('register');
 });
 
-// Routes for a new user
-router.post('/register', function(req, res, next) {
+// Route for user registration
+router.post('/register', async function(req, res, next) {
   const { username, password } = req.body;
 
   if (!username || !password) {
