@@ -60,7 +60,7 @@ The server will be running at `http://localhost:3000`
 
 Once the server is running, you can access the platform via a web browser and start registering and managing the dogs and bookings.
 
-# Explaining Code 
+# ExplainingCode 
 
 ## The code about how the information is set up in the edit form 
 
