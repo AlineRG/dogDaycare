@@ -2,3 +2,4 @@
 node_modules 
 configs/.gitkeep
 .gitkeep
+configs/globals.js
