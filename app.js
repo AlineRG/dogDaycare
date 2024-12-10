@@ -1,3 +1,4 @@
+const debug = require('debug')('dogdaycare:server');
 require('dotenv').config();
 var createError = require('http-errors');
 var express = require('express');
@@ -76,18 +77,23 @@ app.use(passport.session());
 // Passport Local Strategy
 passport.use(new LocalStrategy(async (username, password, done) => {
   try {
-    const user = await User.findOne({ username: username, authType: 'local' });
+    debug(`Attempting to authenticate user: ${username}`);
+    const user = await User.findOne({ username: username.toLowerCase() });
     if (!user) {
-      return done(null, false, { message: 'Incorrect username' });
+      debug(`User not found: ${username}`);
+      return done(null, false, { message: 'Incorrect username or password' });
     }
     
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      return done(null, false, { message: 'Incorrect password' });
+      debug(`Incorrect password for user: ${username}`);
+      return done(null, false, { message: 'Incorrect username or password' });
     }
     
+    debug(`User authenticated successfully: ${username}`);
     return done(null, user);
   } catch (err) {
+    debug(`Error in authentication: ${err}`);
     return done(err);
   }
 }));
@@ -107,7 +113,7 @@ async function(accessToken, refreshToken, profile, done) {
     
     // Create new user with GitHub profile
     user = new User({
-      username: profile.username,
+      username: profile.username.toLowerCase(),
       githubId: profile.id,
       authType: 'github'
     });
@@ -154,36 +160,70 @@ app.use('/auth', authRouter);
 app.use('/pets', isAuthenticated, petsRouter);
 app.use('/reservations', isAuthenticated, reservationsRouter);
 
-// Login and register routes
+// Login routes
 app.get('/login', (req, res) => {
-  res.render('login', { message: req.flash('error') });
+  debug('GET /login route hit');
+  res.render('login', { title: 'Login', message: req.flash('error') });
 });
 
-app.post('/login', passport.authenticate('local', {
-  successRedirect: '/home',
-  failureRedirect: '/login',
-  failureFlash: true
-}));
+app.post('/login', (req, res, next) => {
+  debug('POST /login route hit');
+  debug(`Login attempt for username: ${req.body.username}`);
+  passport.authenticate('local', (err, user, info) => {
+    if (err) { 
+      debug(`Login error: ${err}`);
+      return next(err); 
+    }
+    if (!user) { 
+      debug(`Login failed: ${info.message}`);
+      req.flash('error', info.message);
+      return res.redirect('/login'); 
+    }
+    req.logIn(user, (err) => {
+      if (err) { 
+        debug(`Login error: ${err}`);
+        return next(err); 
+      }
+      debug(`User logged in successfully: ${user.username}`);
+      return res.redirect('/home');
+    });
+  })(req, res, next);
+});
 
+// Register routes
 app.get('/register', (req, res) => {
-  res.render('register');
+  debug('GET /register route hit');
+  res.render('register', { title: 'Register', message: req.flash('error') });
 });
 
 app.post('/register', async (req, res) => {
+  debug('POST /register route hit');
   try {
-    const user = await User.create({ 
-      username: req.body.username, 
-      password: req.body.password,
-      authType: 'local'
-    });
+    const { username, password } = req.body;
+    const lowercaseUsername = username.toLowerCase();
+    debug(`Attempting to register user: ${lowercaseUsername}`);
+    const existingUser = await User.findOne({ username: lowercaseUsername });
+    if (existingUser) {
+      debug(`Username already exists: ${lowercaseUsername}`);
+      req.flash('error', 'Username already exists');
+      return res.redirect('/register');
+    }
+    const user = new User({ username: lowercaseUsername, authType: 'local' });
+    await user.setPassword(password);
+    await user.save();
+    debug(`User registered successfully: ${lowercaseUsername}`);
     req.login(user, (err) => {
       if (err) {
-        return res.send('Error logging in after registration: ' + err);
+        debug(`Error logging in after registration: ${err}`);
+        req.flash('error', 'Error logging in after registration');
+        return res.redirect('/login');
       }
       return res.redirect('/home');
     });
   } catch (err) {
-    res.send('Error registering user: ' + err);
+    debug(`Registration error: ${err}`);
+    req.flash('error', 'Error registering user');
+    res.redirect('/register');
   }
 });
 
@@ -215,8 +255,30 @@ app.use(function(err, req, res, next) {
 });
 
 // MongoDB connection
-mongoose.connect(configurations.ConnectionStrings.MongoDB, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('Successfully connected to MongoDB'))
-  .catch((err) => console.error('Error connecting to MongoDB:', err));
+mongoose.connect(configurations.ConnectionStrings.MongoDB)
+  .then(() => {
+    debug('Successfully connected to MongoDB');
+    console.log('Successfully connected to MongoDB');
+  })
+  .catch((err) => {
+    debug('Error connecting to MongoDB:', err);
+    console.error('Error connecting to MongoDB:', err);
+  });
+
+// Test the database connection
+mongoose.connection.on('connected', () => {
+  debug('Mongoose connected to db');
+  console.log('Mongoose connected to db');
+});
+
+mongoose.connection.on('error', (err) => {
+  debug('Mongoose connection error:', err);
+  console.error('Mongoose connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  debug('Mongoose disconnected');
+  console.log('Mongoose disconnected');
+});
 
 module.exports = app;

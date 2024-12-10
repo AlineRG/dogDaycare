@@ -1,18 +1,21 @@
 var mongoose = require('mongoose');
-var bcrypt = require('bcryptjs'); // Used for password encryption
+var bcrypt = require('bcryptjs');
+var debug = require('debug')('dogdaycare:user-model');
 
-// Define user schema
-var userSchema = new mongoose.Schema({
-  // Username field: must be provided, and must be unique across all users
-  username: { type: String, required: true, unique: true },
-  // Password field: must be provided (will be encrypted before saving)
+const userSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true
+  },
   password: {
     type: String,
     required: function() {
       return this.authType === 'local';
     }
   },
-  // GitHub ID field: optional, used for OAuth authentication with GitHub
   githubId: {
     type: String,
     sparse: true,
@@ -26,20 +29,25 @@ var userSchema = new mongoose.Schema({
   }
 });
 
-// Hash password before saving
 userSchema.pre('save', async function(next) {
-  if (this.isModified('password') && this.password) {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+  if (this.isModified('password')) {
+    debug(`Hashing password for user: ${this.username}`);
+    this.password = await bcrypt.hash(this.password, 10);
   }
   next();
 });
 
-// Method to compare passwords
 userSchema.methods.comparePassword = async function(candidatePassword) {
-  if (!this.password) return false;
-  return await bcrypt.compare(candidatePassword, this.password);
+  debug(`Comparing password for user: ${this.username}`);
+  if (!this.password) {
+    debug('No password set for user');
+    return false;
+  }
+  const isMatch = await bcrypt.compare(candidatePassword, this.password);
+  debug(`Password match result: ${isMatch}`);
+  return isMatch;
 };
 
-// Create and export the User model
 module.exports = mongoose.model('User', userSchema);
+
+
