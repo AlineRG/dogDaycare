@@ -3,7 +3,7 @@ body {
   margin: 0;
   padding: 2rem;
   min-height: 100vh;
-  background-color: #ffe9da; /* Update 1: Changed background color */
+  background-color: #ffe9da;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -16,81 +16,64 @@ h1 {
   text-align: center;
 }
 
-.auth-container {
+.welcome-container {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.welcome-container p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.auth-links {
   display: flex;
+  gap: 1rem;
   justify-content: center;
-  gap: 4rem;
-  width: 100%;
-  max-width: 1200px;
-  padding: 1rem; /* Added padding */
+  margin-top: 2rem;
 }
 
-form {
-  background: white; /* Update 2: Changed background color to white */
-  padding: 3rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 300px;
-  flex: 1;
-  max-width: 400px;
-}
-
-h2 {
-  color: #111827;
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
-}
-
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #374151;
-}
-
-input[type="text"],
-input[type="password"] {
-  width: 100%;
-  padding: 0.75rem;
-  margin-bottom: 1.5rem;
-  border: 1px solid #e5e7eb;
+.btn {
+  padding: 0.75rem 1.5rem;
   border-radius: 4px;
-  font-size: 1rem;
-  background-color: #f3f4f6;
-  box-sizing: border-box;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
-input[type="text"]:focus,
-input[type="password"]:focus {
-  outline: none;
-  border-color: #6366f1;
-  background-color: #fff;
+.btn-primary, .btn-secondary, .btn-github {
+  background-color: white;
+  color: #a18262;
+  border: 1px solid #a18262;
 }
 
-button[type="submit"] {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #a18262; /* Cambiado a marrón claro */
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-github:hover,
+nav ul li a:hover {
+  background-color: #b69b80;
   color: white;
-  border: none;
+  border-color: #b69b80;
+}
+
+nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+nav ul li a {
+  display: inline-block;
+  color: #a18262;
+  text-decoration: none;
+  padding: 0.75rem 1.5rem;
   border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  border: 1px solid #a18262;
+  background-color: white;
+  transition: all 0.2s;
 }
 
-button[type="submit"]:hover {
-  background-color: #b69b80; /* Un tono más claro para el hover */
-}
-
-@media (max-width: 768px) {
-  .auth-container {
-      flex-direction: column;
-      align-items: center;
-  }
-
-  form {
-      width: 100%;
-      max-width: 300px;
-  }
-}
