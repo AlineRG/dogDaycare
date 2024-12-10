@@ -1,4 +1,4 @@
-const debug = require('debug')('dogdaycare:server');
+var debug = require('debug')('dogdaycare:server');
 require('dotenv').config();
 var createError = require('http-errors');
 var express = require('express');
@@ -78,13 +78,13 @@ app.use(passport.session());
 passport.use(new LocalStrategy(async (username, password, done) => {
   try {
     debug(`Attempting to authenticate user: ${username}`);
-    const user = await User.findOne({ username: username.toLowerCase() });
+    var user = await User.findOne({ username: username.toLowerCase() });
     if (!user) {
       debug(`User not found: ${username}`);
       return done(null, false, { message: 'Incorrect username or password' });
     }
     
-    const isMatch = await user.comparePassword(password);
+    var isMatch = await user.comparePassword(password);
     if (!isMatch) {
       debug(`Incorrect password for user: ${username}`);
       return done(null, false, { message: 'Incorrect username or password' });
