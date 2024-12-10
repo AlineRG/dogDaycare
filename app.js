@@ -74,21 +74,22 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Passport Local Strategy
-passport.use(new LocalStrategy((username, password, done) => {
-  User.findOne({ username: username })
-    .then(user => {
-      if (!user) {
-        return done(null, false, { message: 'Incorrect username' });
-      }
-      user.comparePassword(password, (err, isMatch) => {
-        if (err) return done(err);
-        if (!isMatch) {
-          return done(null, false, { message: 'Incorrect password' });
-        }
-        return done(null, user);
-      });
-    })
-    .catch(err => done(err));
+passport.use(new LocalStrategy(async (username, password, done) => {
+  try {
+    const user = await User.findOne({ username: username, authType: 'local' });
+    if (!user) {
+      return done(null, false, { message: 'Incorrect username' });
+    }
+    
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return done(null, false, { message: 'Incorrect password' });
+    }
+    
+    return done(null, user);
+  } catch (err) {
+    return done(err);
+  }
 }));
 
 // Passport GitHub Strategy
@@ -97,28 +98,25 @@ passport.use(new GitHubStrategy({
   clientSecret: configurations.Authentication.GitHub.ClientSecret,
   callbackURL: configurations.Authentication.GitHub.CallbackURL
 },
-function(accessToken, refreshToken, profile, done) {
-  User.findOne({ githubId: profile.id })
-    .then(user => {
-      if (user) {
-        return done(null, user);
-      } else {
-        const newUser = new User({
-          username: profile.username,
-          githubId: profile.id,
-        });
-        newUser.save()
-          .then(user => {
-            done(null, user);
-          })
-          .catch(err => {
-            done(err);
-          });
-      }
-    })
-    .catch(err => {
-      done(err);
+async function(accessToken, refreshToken, profile, done) {
+  try {
+    let user = await User.findOne({ githubId: profile.id });
+    if (user) {
+      return done(null, user);
+    }
+    
+    // Create new user with GitHub profile
+    user = new User({
+      username: profile.username,
+      githubId: profile.id,
+      authType: 'github'
     });
+    
+    await user.save();
+    return done(null, user);
+  } catch (err) {
+    return done(err);
+  }
 }));
 
 passport.serializeUser(function(user, done) {
@@ -171,14 +169,22 @@ app.get('/register', (req, res) => {
   res.render('register');
 });
 
-app.post('/register', (req, res) => {
-  User.create({ username: req.body.username, password: req.body.password })
-    .then(user => {
-      res.redirect('/home');
-    })
-    .catch(err => {
-      res.send('Error registering user: ' + err);
+app.post('/register', async (req, res) => {
+  try {
+    const user = await User.create({ 
+      username: req.body.username, 
+      password: req.body.password,
+      authType: 'local'
     });
+    req.login(user, (err) => {
+      if (err) {
+        return res.send('Error logging in after registration: ' + err);
+      }
+      return res.redirect('/home');
+    });
+  } catch (err) {
+    res.send('Error registering user: ' + err);
+  }
 });
 
 // GitHub auth routes

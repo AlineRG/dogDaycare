@@ -1,45 +1,44 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcryptjs'); // Used for password encryption
-var Schema = mongoose.Schema;
 
 // Define user schema
-var userSchema = new Schema({
+var userSchema = new mongoose.Schema({
   // Username field: must be provided, and must be unique across all users
   username: { type: String, required: true, unique: true },
   // Password field: must be provided (will be encrypted before saving)
-  password: { type: String, required: true },
+  password: {
+    type: String,
+    required: function() {
+      return this.authType === 'local';
+    }
+  },
   // GitHub ID field: optional, used for OAuth authentication with GitHub
-  githubId: { type: String }
+  githubId: {
+    type: String,
+    sparse: true,
+    unique: true
+  },
+  authType: {
+    type: String,
+    required: true,
+    enum: ['local', 'github'],
+    default: 'local'
+  }
 });
 
-// Pre-save hook: runs before saving the user to the database
-userSchema.pre('save', function(next) {
-  var user = this;
-  // Only hash the password if it has been modified (or is new)
-  if (!user.isModified('password')) return next();
-
-  // Generate a salt
-  // Create a unique "salt" for this password
-  // A salt is like a secret ingredient that makes each scrambled password unique
-  // The number 10 determines how complex the salt should be
-  bcrypt.genSalt(10, function(err, salt) {
-    if (err) return next(err);
-    // This part takes the user's password and makes it unreadable
-    bcrypt.hash(user.password, salt, function(err, hash) {
-      if (err) return next(err);
-      // Override the plaintext password with the hashed one
-      user.password = hash;
-      next();
-    });
-  });
+// Hash password before saving
+userSchema.pre('save', async function(next) {
+  if (this.isModified('password') && this.password) {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+  }
+  next();
 });
 
-// Method to compare a given password with the user's hashed password
-userSchema.methods.comparePassword = function(candidatePassword, cb) {
-  bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
-    if (err) return cb(err);
-    cb(null, isMatch);
-  });
+// Method to compare passwords
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  if (!this.password) return false;
+  return await bcrypt.compare(candidatePassword, this.password);
 };
 
 // Create and export the User model
