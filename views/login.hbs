@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}} - Dog DayCare</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <h1>Login to Dog DayCare</h1>
+        {{#if message}}
+            <p class="error-message">{{message}}</p>
+        {{/if}}
+        <form action="/login" method="POST">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+        <div class="auth-links">
+            <p>Don't have an account? <a href="/register">Register here</a></p>
+            <p>Or login with: <a href="/auth/github" class="github-button">GitHub</a></p>
+        </div>
+    </div>
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Form submitted');
+            this.submit();
+        });
+    </script>
+</body>
+</html>
+
