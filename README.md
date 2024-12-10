@@ -7,6 +7,7 @@ This repository contains information for a web page for a dog daycare.
 3. [Previous_requirements](#Previous_requirements)
 4. [Installation](#Installation)
 5. [ExplainingCode](#Explaining code)
+6. [TechnologiesUsed](#Technologies used)
 
 # Description
 
@@ -286,3 +287,14 @@ In the template (`reservations.hbs`):
 
 - `value="{{this._id}}"`: The pet's ID (needed for the reservation)
 - `{{this.name}}`: The pet's name (what you see in the dropdown)
+
+# Technologies used
+
+The Dog DayCare application uses the following front-end tools and technologies:
+
+- Express.js: The main web application framework used for both backend and serving the frontend.
+- Handlebars: A templating engine used for rendering dynamic content in the frontend.
+- CSS: Custom CSS files are used for styling (e.g., style.css, login.css, register.css).
+- Client-side JavaScript: Some basic client-side scripting is used, primarily for form submissions.
+- Passport.js: Used for authentication, including local strategy and GitHub OAuth.
+- MongoDB with Mongoose: For database operations.
