@@ -22,6 +22,22 @@ var petsRouter = require('./routes/pets');
 var reservationsRouter = require('./routes/reservations');
 var authRouter = require('./routes/auth');
 
+// Move the MongoDB connection logic to a separate function
+async function connectToDatabase() {
+  if (mongoose.connection.readyState === 1) {
+    return;
+  }
+  try {
+    await mongoose.connect(configurations.ConnectionStrings.MongoDB);
+    debug('Successfully connected to MongoDB');
+    console.log('Successfully connected to MongoDB');
+  } catch (err) {
+    debug('Error connecting to MongoDB:', err);
+    console.error('Error connecting to MongoDB:', err);
+    throw err;
+  }
+}
+
 var app = express();
 
 // View engine setup
@@ -145,6 +161,16 @@ function isAuthenticated(req, res, next) {
   res.redirect('/login');
 }
 
+// Add connection handling before routes
+app.use(async (req, res, next) => {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Make user available to all routes
 app.use((req, res, next) => {
   res.locals.user = req.user;
@@ -254,31 +280,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-// MongoDB connection
-mongoose.connect(configurations.ConnectionStrings.MongoDB)
-  .then(() => {
-    debug('Successfully connected to MongoDB');
-    console.log('Successfully connected to MongoDB');
-  })
-  .catch((err) => {
-    debug('Error connecting to MongoDB:', err);
-    console.error('Error connecting to MongoDB:', err);
-  });
-
-// Test the database connection
-mongoose.connection.on('connected', () => {
-  debug('Mongoose connected to db');
-  console.log('Mongoose connected to db');
-});
-
-mongoose.connection.on('error', (err) => {
-  debug('Mongoose connection error:', err);
-  console.error('Mongoose connection error:', err);
-});
-
-mongoose.connection.on('disconnected', () => {
-  debug('Mongoose disconnected');
-  console.log('Mongoose disconnected');
-});
-
 module.exports = app;
+
+
