@@ -17,6 +17,11 @@ var passport = require('passport');
 var flash = require('connect-flash');
 var configurations = require('./configs/globals');
 
+// Conexión a MongoDB
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('Conexión a MongoDB establecida'))
+  .catch(err => console.error('Error de conexión a MongoDB:', err));
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var petsRouter = require('./routes/pets');
@@ -26,27 +31,6 @@ var testDbRouter = require('./routes/test-db');
 
 mongoose.set('bufferCommands', false);
 mongoose.set('strictQuery', true);
-
-// Move the MongoDB connection logic to a separate function
-async function connectToDatabase() {
-  if (mongoose.connection.readyState === 1) {
-    return;
-  }
-  try {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 5000,
-      connectTimeoutMS: 5000,
-      maxPoolSize: 10
-    });
-    debug('Successfully connected to MongoDB');
-    console.log('Successfully connected to MongoDB');
-  } catch (err) {
-    debug('Error connecting to MongoDB:', err);
-    console.error('Error connecting to MongoDB:', err);
-    throw err;
-  }
-}
 
 var app = express();
 
@@ -84,41 +68,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Session configuration with MongoStore
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your secret here',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: process.env.MONGODB_URI,
-    ttl: 24 * 60 * 60, // Session TTL (in seconds)
+    ttl: 14 * 24 * 60 * 60, // 14 días
     autoRemove: 'native',
-    touchAfter: 24 * 3600, // Time period in seconds between session updates
-    crypto: {
-      secret: process.env.SESSION_SECRET || 'your secret here'
-    },
-    collectionName: 'sessions'
+    touchAfter: 24 * 3600 // Time period in seconds between session updates
   }),
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    maxAge: 14 * 24 * 60 * 60 * 1000, // 14 días en milisegundos
     httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax'
   }
 }));
-
-// Add this right after your session middleware
-app.use((req, res, next) => {
-  if (req.session && !req.session.regenerate) {
-    req.session.regenerate = (cb) => {
-      cb();
-    };
-  }
-  if (req.session && !req.session.save) {
-    req.session.save = (cb) => {
-      cb();
-    };
-  }
-  next();
-});
 
 // Flash messages
 app.use(flash());
@@ -197,16 +162,6 @@ function isAuthenticated(req, res, next) {
   }
   res.redirect('/login');
 }
-
-// Add connection handling before routes
-app.use(async (req, res, next) => {
-  try {
-    await connectToDatabase();
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
 
 // Make user available to all routes
 app.use((req, res, next) => {
@@ -303,6 +258,26 @@ app.get('/auth/github/callback',
 
 app.get('/home', isAuthenticated, (req, res) => {
   res.render('home', { title: 'Home', user: req.user });
+});
+
+// Test routes
+app.get('/test-db', async (req, res) => {
+  try {
+    await mongoose.connection.db.admin().ping();
+    res.send('Conexión a la base de datos exitosa');
+  } catch (error) {
+    res.status(500).send('Error de conexión a la base de datos: ' + error.message);
+  }
+});
+
+app.get('/test-session', (req, res) => {
+  if (req.session.views) {
+    req.session.views++;
+    res.send(`Has visitado esta página ${req.session.views} veces`);
+  } else {
+    req.session.views = 1;
+    res.send('Bienvenido a esta página por primera vez');
+  }
 });
 
 // Catch 404 and forward to error handler
