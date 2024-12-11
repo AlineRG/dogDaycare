@@ -21,17 +21,21 @@ var usersRouter = require('./routes/users');
 var petsRouter = require('./routes/pets');
 var reservationsRouter = require('./routes/reservations');
 var authRouter = require('./routes/auth');
+var testDbRouter = require('./routes/test-db');
+
+mongoose.set('bufferCommands', false);
+mongoose.set('strictQuery', true);
 
 // Move the MongoDB connection logic to a separate function
 async function connectToDatabase() {
   if (mongoose.connection.readyState === 1) {
     return;
   }
-  mongoose.set('bufferCommands', false);
   try {
-    await mongoose.connect(configurations.ConnectionStrings.MongoDB, {
+    await mongoose.connect(process.env.MONGODB_URI, {
       serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
+      socketTimeoutMS: 5000,
+      connectTimeoutMS: 5000,
       maxPoolSize: 10
     });
     debug('Successfully connected to MongoDB');
@@ -208,6 +212,7 @@ app.use('/users', usersRouter);
 app.use('/auth', authRouter);
 app.use('/pets', isAuthenticated, petsRouter);
 app.use('/reservations', isAuthenticated, reservationsRouter);
+app.use('/test-db', testDbRouter);
 
 // Login routes
 app.get('/login', (req, res) => {
@@ -304,6 +309,3 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
-
-
-
