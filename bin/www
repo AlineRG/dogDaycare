@@ -5,6 +5,10 @@
  */
 
 var app = require('../app');
+if (!app || typeof app.set !== 'function') {
+  console.error('Error: La aplicación Express no se ha importado correctamente.');
+  process.exit(1);
+}
 var debug = require('debug')('dogdaycare:server');
 var http = require('http');
 
@@ -88,3 +92,4 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
+
