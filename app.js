@@ -27,8 +27,13 @@ async function connectToDatabase() {
   if (mongoose.connection.readyState === 1) {
     return;
   }
+  mongoose.set('bufferCommands', false);
   try {
-    await mongoose.connect(configurations.ConnectionStrings.MongoDB);
+    await mongoose.connect(configurations.ConnectionStrings.MongoDB, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      maxPoolSize: 10
+    });
     debug('Successfully connected to MongoDB');
     console.log('Successfully connected to MongoDB');
   } catch (err) {
@@ -79,9 +84,27 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    httpOnly: true,
+    sameSite: 'lax'
+  },
+  rolling: true
 }));
+
+// Add this right after your session middleware
+app.use((req, res, next) => {
+  if (req.session && !req.session.regenerate) {
+    req.session.regenerate = (cb) => {
+      cb();
+    };
+  }
+  if (req.session && !req.session.save) {
+    req.session.save = (cb) => {
+      cb();
+    };
+  }
+  next();
+});
 
 // Flash messages
 app.use(flash());
@@ -281,5 +304,6 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+
 
 

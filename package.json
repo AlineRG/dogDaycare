@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "set DEBUG=dogdaycare:* && nodemon ./bin/www"
+    "dev": "set DEBUG=dogdaycare:* && nodemon ./bin/www",
+    "build": "npm install"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
