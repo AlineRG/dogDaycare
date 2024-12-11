@@ -11,7 +11,8 @@ var LocalStrategy = require('passport-local').Strategy;
 var GitHubStrategy = require('passport-github2').Strategy;
 var expressHandlebars = require('express-handlebars');
 var Handlebars = require('handlebars');
-var cookieSession = require('cookie-session');
+var session = require('express-session');
+var MemoryStore = require('memorystore')(session);
 var passport = require('passport');
 var flash = require('connect-flash');
 var configurations = require('./configs/globals');
@@ -85,23 +86,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.set('trust proxy', 1);
 
-
-// Session configuration
-app.use(cookieSession({
-  name: 'session',
-  keys: [process.env.SESSION_SECRET],
-  maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
-  secure: process.env.NODE_ENV === 'production',
-  httpOnly: true,
-  sameSite: 'lax'
+// Session configuration with MemoryStore
+app.use(session({
+  cookie: { maxAge: 86400000 },
+  store: new MemoryStore({
+    checkPeriod: 86400000 // prune expired entries every 24h
+  }),
+  resave: false,
+  saveUninitialized: false,
+  secret: process.env.SESSION_SECRET || 'keyboard cat'
 }));
-
-app.use((req, res, next) => {
-  if (!req.session) {
-    return next(new Error('Session initialization failed'));
-  }
-  next();
-});
 
 // Flash messages
 app.use(flash());
@@ -188,7 +182,6 @@ app.use((req, res, next) => {
   res.locals.success = req.flash('success');
   next();
 });
-
 
 // Routes
 app.use('/', indexRouter);
@@ -317,9 +310,12 @@ async function initializeApp() {
   try {
     await connectToDatabase();
     console.log('Database connected successfully');
-    // Removed session configuration from here
-  
-    // You can add other initialization steps here if needed
+    
+    // Add session check on initialization
+    if (!process.env.SESSION_SECRET) {
+      console.warn('WARNING: SESSION_SECRET not set. Using default secret. This is not secure for production.');
+    }
+    
   } catch (error) {
     console.error('Failed to initialize the application:', error);
     process.exit(1);
@@ -329,18 +325,10 @@ async function initializeApp() {
 // Call this function when you start your server in bin/www
 app.initializeApp = initializeApp;
 
-// Connect to database before handling routes is now handled in initializeApp
-// app.use(async (req, res, next) => {
-//   try {
-//     await connectToDatabase();
-//     next();
-//   } catch (error) {
-//     next(error);
-//   }
-// });
-
-
 module.exports = app;
+
+
+
 
 
 

@@ -4,31 +4,30 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "set DEBUG=dogdaycare:* && nodemon ./bin/www",
-    "build": "npm install"
+    "dev": "set DEBUG=dogdaycare:* && nodemon ./bin/www"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "body-parser": "^1.20.3",
     "connect-flash": "^0.1.1",
-    "connect-mongo": "^5.1.0",
-    "cookie-parser": "^1.4.6",
-    "debug": "^4.3.4",
-    "dotenv": "^16.4.5",
-    "express": "^4.18.2",
-    "express-handlebars": "^8.0.1",
-    "express-session": "^1.18.0",
-    "handlebars": "^4.7.8",
-    "hbs": "^4.2.0",
-    "http-errors": "^2.0.0",
-    "mongodb": "^6.3.0",
-    "mongoose": "^8.8.4",
-    "morgan": "^1.10.0",
-    "passport": "^0.7.0",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "dotenv": "^10.0.0",
+    "express": "~4.16.1",
+    "express-handlebars": "^5.3.4",
+    "express-session": "^1.17.3",
+    "handlebars": "^4.7.7",
+    "http-errors": "~1.6.3",
+    "ioredis": "^5.3.2",
+    "memorystore": "^1.6.7",
+    "mongoose": "^6.0.12",
+    "morgan": "~1.9.1",
+    "passport": "^0.5.0",
     "passport-github2": "^0.1.12",
     "passport-local": "^1.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.3"
+    "nodemon": "^2.0.14"
   }
 }
+
+

@@ -1,0 +1,20 @@
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Users\prin_\AppData\Roaming\npm\node_modules\npm\bin\npm-cli.js
+1 info using npm@10.9.2
+2 info using node@v20.17.0
+3 silly config load:file:C:\Users\prin_\AppData\Roaming\npm\node_modules\npm\npmrc
+4 silly config load:file:C:\dogDaycare\.npmrc
+5 silly config load:file:C:\Users\prin_\.npmrc
+6 silly config load:file:C:\Users\prin_\AppData\Roaming\npm\etc\npmrc
+7 verbose title npm list connect-redis
+8 verbose argv "list" "connect-redis"
+9 verbose logfile logs-max:10 dir:C:\dogDaycare\Usersprin_npm-cache\_logs\2024-12-11T05_24_15_684Z-
+10 verbose logfile C:\dogDaycare\Usersprin_npm-cache\_logs\2024-12-11T05_24_15_684Z-debug-0.log
+11 silly logfile start cleaning logs, removing 1 files
+12 silly packumentCache heap:4345298944 maxSize:1086324736 maxEntrySize:543162368
+13 silly logfile done cleaning log files
+14 verbose cwd C:\dogDaycare
+15 verbose os Windows_NT 10.0.22631
+16 verbose node v20.17.0
+17 verbose npm  v10.9.2
+18 verbose exit 0
+19 info ok
