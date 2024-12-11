@@ -1,38 +1,56 @@
-var debug = require('debug')('dogdaycare:server');
 require('dotenv').config();
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var mongoose = require('mongoose');
-var User = require('./models/user');
-var LocalStrategy = require('passport-local').Strategy;
-var GitHubStrategy = require('passport-github2').Strategy;
-var { engine } = require('express-handlebars');
-var Handlebars = require('handlebars');
-var session = require('express-session');
-var MongoStore = require('connect-mongo');
-var passport = require('passport');
-var flash = require('connect-flash');
-var configurations = require('./configs/globals');
+const debug = require('debug')('dogdaycare:server');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const mongoose = require('mongoose');
+const User = require('./models/user');
+const LocalStrategy = require('passport-local').Strategy;
+const GitHubStrategy = require('passport-github2').Strategy;
+const { engine } = require('express-handlebars');
+const Handlebars = require('handlebars');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+const passport = require('passport');
+const flash = require('connect-flash');
+const configurations = require('./configs/globals');
 
-// Conexión a MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Conexión a MongoDB establecida'))
-  .catch(err => console.error('Error de conexión a MongoDB:', err));
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+const petsRouter = require('./routes/pets');
+const reservationsRouter = require('./routes/reservations');
+const authRouter = require('./routes/auth');
+const testDbRouter = require('./routes/test-db');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var petsRouter = require('./routes/pets');
-var reservationsRouter = require('./routes/reservations');
-var authRouter = require('./routes/auth');
-var testDbRouter = require('./routes/test-db');
+const app = express();
 
-mongoose.set('bufferCommands', false);
-mongoose.set('strictQuery', true);
-
-var app = express();
+// MongoDB connection function
+async function connectToDatabase() {
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
+  
+  try {
+    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 5000,
+      connectTimeoutMS: 5000,
+      maxPoolSize: 10,
+      minPoolSize: 0,
+      maxIdleTimeMS: 10000,
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    
+    console.log('MongoDB connected successfully');
+    return conn;
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    throw error;
+  }
+}
 
 // View engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -66,21 +84,30 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Session configuration with MongoStore
+// Session configuration
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: process.env.MONGODB_URI,
-    ttl: 14 * 24 * 60 * 60, // 14 días
+    collectionName: 'sessions',
+    ttl: 14 * 24 * 60 * 60,
     autoRemove: 'native',
-    touchAfter: 24 * 3600 // Time period in seconds between session updates
+    touchAfter: 24 * 3600,
+    crypto: {
+      secret: process.env.SESSION_SECRET
+    },
+    mongoOptions: {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 5000,
+      connectTimeoutMS: 5000
+    }
   }),
   cookie: {
-    maxAge: 14 * 24 * 60 * 60 * 1000, // 14 días en milisegundos
-    httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
+    maxAge: 14 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
     sameSite: 'lax'
   }
 }));
@@ -96,13 +123,13 @@ app.use(passport.session());
 passport.use(new LocalStrategy(async (username, password, done) => {
   try {
     debug(`Attempting to authenticate user: ${username}`);
-    var user = await User.findOne({ username: username.toLowerCase() });
+    const user = await User.findOne({ username: username.toLowerCase() });
     if (!user) {
       debug(`User not found: ${username}`);
       return done(null, false, { message: 'Incorrect username or password' });
     }
     
-    var isMatch = await user.comparePassword(password);
+    const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       debug(`Incorrect password for user: ${username}`);
       return done(null, false, { message: 'Incorrect username or password' });
@@ -169,6 +196,16 @@ app.use((req, res, next) => {
   res.locals.error = req.flash('error');
   res.locals.success = req.flash('success');
   next();
+});
+
+// Connect to database before handling routes
+app.use(async (req, res, next) => {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Routes
