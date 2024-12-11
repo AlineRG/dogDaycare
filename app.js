@@ -12,6 +12,7 @@ var GitHubStrategy = require('passport-github2').Strategy;
 var { engine } = require('express-handlebars');
 var Handlebars = require('handlebars');
 var session = require('express-session');
+var MongoStore = require('connect-mongo');
 var passport = require('passport');
 var flash = require('connect-flash');
 var configurations = require('./configs/globals');
@@ -82,6 +83,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Session configuration with MongoStore
+const session = require('express-session');
 const MongoStore = require('connect-mongo');
 
 app.use(session({
