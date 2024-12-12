@@ -12,7 +12,8 @@ var GitHubStrategy = require('passport-github2').Strategy;
 var expressHandlebars = require('express-handlebars');
 var Handlebars = require('handlebars');
 var session = require('express-session');
-var MemoryStore = require('memorystore')(session);
+var Redis = require('ioredis');
+var connectRedis = require('connect-redis');
 var passport = require('passport');
 var flash = require('connect-flash');
 var configurations = require('./configs/globals');
@@ -86,15 +87,37 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.set('trust proxy', 1);
 
-// Session configuration with MemoryStore
+// Redis client setup
+let redisClient;
+if (process.env.UPSTASH_REDIS_URL) {
+  redisClient = new Redis(process.env.UPSTASH_REDIS_URL);
+} else {
+  console.warn('UPSTASH_REDIS_URL not set. Falling back to local Redis.');
+  redisClient = new Redis();
+}
+
+redisClient.on('error', function (err) {
+  console.log('Could not establish a connection with redis. ' + err);
+});
+
+redisClient.on('connect', function () {
+  console.log('Connected to redis successfully');
+});
+
+// Session store setup
+const RedisStore = connectRedis(session);
+
+// Session configuration
 app.use(session({
-  cookie: { maxAge: 86400000 },
-  store: new MemoryStore({
-    checkPeriod: 86400000 // prune expired entries every 24h
-  }),
+  store: new RedisStore({ client: redisClient }),
+  secret: process.env.SESSION_SECRET || 'your_session_secret',
   resave: false,
   saveUninitialized: false,
-  secret: process.env.SESSION_SECRET || 'keyboard cat'
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
 }));
 
 // Flash messages
@@ -326,6 +349,10 @@ async function initializeApp() {
 app.initializeApp = initializeApp;
 
 module.exports = app;
+
+
+
+
 
 
 
