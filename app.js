@@ -258,10 +258,7 @@ app.use(function(err, req, res, next) {
 });
 
 // MongoDB connection
-mongoose.connect(configurations.ConnectionStrings.MongoDB, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(configurations.ConnectionStrings.MongoDB)
 .then(() => {
   debug('Successfully connected to MongoDB');
   console.log('Successfully connected to MongoDB');
