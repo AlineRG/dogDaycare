@@ -258,17 +258,26 @@ app.use(function(err, req, res, next) {
 });
 
 // MongoDB connection
-mongoose.connect(configurations.ConnectionStrings.MongoDB)
-.then(() => {
-  debug('Successfully connected to MongoDB');
-  console.log('Successfully connected to MongoDB');
-})
-.catch((err) => {
-  debug('Error connecting to MongoDB:', err);
-  console.error('Error connecting to MongoDB:', err);
-});
+const mongooseOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  ssl: true,
+  sslValidate: true,
+};
+
+mongoose.connect(configurations.ConnectionStrings.MongoDB, mongooseOptions)
+  .then(() => {
+    debug('Successfully connected to MongoDB');
+    console.log('Successfully connected to MongoDB');
+  })
+  .catch((err) => {
+    debug('Error connecting to MongoDB:', err);
+    console.error('Error connecting to MongoDB:', err);
+  });
 
 module.exports = app;
+
+
 
 
 
