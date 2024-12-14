@@ -257,25 +257,30 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-// MongoDB connection
+// MongoDB connection and server start
+const PORT = process.env.PORT || 3000;
+
 const mongooseOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  ssl: true,
-  sslValidate: true,
+  ssl: true
 };
 
 mongoose.connect(configurations.ConnectionStrings.MongoDB, mongooseOptions)
   .then(() => {
     debug('Successfully connected to MongoDB');
     console.log('Successfully connected to MongoDB');
+    
+    // Start the server after successful database connection
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
   })
   .catch((err) => {
     debug('Error connecting to MongoDB:', err);
     console.error('Error connecting to MongoDB:', err);
+    process.exit(1);
   });
-
-module.exports = app;
 
 
 
