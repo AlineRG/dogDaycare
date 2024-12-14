@@ -9,11 +9,9 @@ var mongoose = require('mongoose');
 var User = require('./models/user');
 var LocalStrategy = require('passport-local').Strategy;
 var GitHubStrategy = require('passport-github2').Strategy;
-var expressHandlebars = require('express-handlebars');
+var { create } = require('express-handlebars');
 var Handlebars = require('handlebars');
 var session = require('express-session');
-var Redis = require('ioredis');
-var connectRedis = require('connect-redis');
 var passport = require('passport');
 var flash = require('connect-flash');
 var configurations = require('./configs/globals');
@@ -27,57 +25,37 @@ var testDbRouter = require('./routes/test-db');
 
 var app = express();
 
-// MongoDB connection function
-async function connectToDatabase() {
-  if (mongoose.connection.readyState === 1) {
-    return mongoose.connection;
-  }
-  
-  try {
-    var conn = await mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 5000,
-      connectTimeoutMS: 5000,
-      maxPoolSize: 10,
-      minPoolSize: 0,
-      maxIdleTimeMS: 10000,
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
-    
-    console.log('MongoDB connected successfully');
-    return conn;
-  } catch (error) {
-    console.error('MongoDB connection error:', error);
-    throw error;
-  }
-}
-
 // View engine setup
-app.set('views', path.join(__dirname, 'views'));
-var hbs = expressHandlebars.create({
+const hbs = create({
   extname: '.hbs',
-  defaultLayout: false,
-  helpers: {
-    eq: function (a, b) {  
-      return a === b;
-    },
-    json: function(context) {
-      return JSON.stringify(context, null, 2);
-    },
-    formatDate: function(date) {
-      return new Date(date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
-  }
+  defaultLayout: 'layout',
+  layoutsDir: path.join(__dirname, 'views'),
+  partialsDir: path.join(__dirname, 'views/partials')
 });
+
 app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, 'views'));
+
+// Handlebars helpers
+Handlebars.registerHelper('eq', function (a, b) {
+  return a === b;
+});
+
+Handlebars.registerHelper('json', function(context) {
+  return JSON.stringify(context, null, 2);
+});
+
+Handlebars.registerHelper('formatDate', function(date) {
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+});
+
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -87,29 +65,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.set('trust proxy', 1);
 
-// Redis client setup
-let redisClient;
-if (process.env.UPSTASH_REDIS_URL) {
-  redisClient = new Redis(process.env.UPSTASH_REDIS_URL);
-} else {
-  console.warn('UPSTASH_REDIS_URL not set. Falling back to local Redis.');
-  redisClient = new Redis();
-}
-
-redisClient.on('error', function (err) {
-  console.log('Could not establish a connection with redis. ' + err);
-});
-
-redisClient.on('connect', function () {
-  console.log('Connected to redis successfully');
-});
-
-// Session store setup
-const RedisStore = connectRedis(session);
-
 // Session configuration
 app.use(session({
-  store: new RedisStore({ client: redisClient }),
   secret: process.env.SESSION_SECRET || 'your_session_secret',
   resave: false,
   saveUninitialized: false,
@@ -159,12 +116,16 @@ passport.use(new GitHubStrategy({
 },
 async function(accessToken, refreshToken, profile, done) {
   try {
+    debug('GitHub authentication callback started');
+    debug('Profile received:', JSON.stringify(profile, null, 2));
+
     var user = await User.findOne({ githubId: profile.id });
     if (user) {
+      debug('Existing user found:', user.username);
       return done(null, user);
     }
     
-    // Create new user with GitHub profile
+    debug('Creating new user with GitHub profile');
     user = new User({
       username: profile.username.toLowerCase(),
       githubId: profile.id,
@@ -172,8 +133,10 @@ async function(accessToken, refreshToken, profile, done) {
     });
     
     await user.save();
+    debug('New user created successfully:', user.username);
     return done(null, user);
   } catch (err) {
+    debug('Error in GitHub authentication:', err);
     return done(err);
   }
 }));
@@ -328,6 +291,21 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+// MongoDB connection
+mongoose.connect(configurations.ConnectionStrings.MongoDB, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => {
+  debug('Successfully connected to MongoDB');
+  console.log('Successfully connected to MongoDB');
+})
+.catch((err) => {
+  debug('Error connecting to MongoDB:', err);
+  console.error('Error connecting to MongoDB:', err);
+});
+
+
 // Make sure to call this function before setting up the session
 async function initializeApp() {
   try {
@@ -348,7 +326,45 @@ async function initializeApp() {
 // Call this function when you start your server in bin/www
 app.initializeApp = initializeApp;
 
+// MongoDB connection function (This remains largely unchanged, but is now called from initializeApp)
+async function connectToDatabase() {
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
+  
+  try {
+    mongoose.set('strictQuery', false); // Add this line to address the deprecation warning
+    var conn = await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    
+    console.log('MongoDB connected successfully');
+    return conn;
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    throw error;
+  }
+}
+
+
 module.exports = app;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
