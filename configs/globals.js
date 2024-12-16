@@ -13,7 +13,7 @@
 //   }
 // };
 
-module.exports = configurations;
+// module.exports = configurations;
 
 require('dotenv').config();
 
