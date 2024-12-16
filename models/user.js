@@ -33,14 +33,22 @@ const userSchema = new mongoose.Schema({
 
 userSchema.pre('save', async function(next) {
   if (this.isModified('password')) {
-    this.password = await bcrypt.hash(this.password, 10);
+    try {
+      this.password = await bcrypt.hash(this.password, 10);
+    } catch (error) {
+      debug(`Error hashing password: ${error}`);
+      return next(error);
+    }
   }
   next();
 });
 
 userSchema.methods.comparePassword = async function(candidatePassword) {
   try {
-    return await bcrypt.compare(candidatePassword, this.password);
+    debug(`Comparing passwords for user: ${this.username}`);
+    const isMatch = await bcrypt.compare(candidatePassword, this.password);
+    debug(`Password match result: ${isMatch}`);
+    return isMatch;
   } catch (error) {
     debug(`Error comparing passwords: ${error}`);
     throw error;
@@ -53,6 +61,16 @@ userSchema.methods.setPassword = async function(password) {
     this.password = await bcrypt.hash(password, 10);
   } catch (error) {
     debug(`Error setting password: ${error}`);
+    throw error;
+  }
+};
+
+userSchema.statics.findByUsername = async function(username) {
+  debug(`Finding user by username: ${username}`);
+  try {
+    return await this.findOne({ username: username.toLowerCase() });
+  } catch (error) {
+    debug(`Error finding user by username: ${error}`);
     throw error;
   }
 };

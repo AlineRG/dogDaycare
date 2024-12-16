@@ -125,14 +125,17 @@ async function(accessToken, refreshToken, profile, done) {
 }));
 
 passport.serializeUser((user, done) => {
+  debug('Serializing user:', user.id);
   done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
   try {
+    debug('Deserializing user:', id);
     const user = await User.findById(id);
     done(null, user);
   } catch (err) {
+    debug('Error deserializing user:', err);
     done(err);
   }
 });
@@ -283,6 +286,7 @@ mongoose.connect(configurations.ConnectionStrings.MongoDB, mongooseOptions)
     process.exit(1);
   });
 
+module.exports = app;
 
 
 
