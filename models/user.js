@@ -57,42 +57,9 @@ userSchema.methods.setPassword = async function(password) {
   }
 };
 
-userSchema.statics.findByUsername = async function(username) {
-  debug(`Finding user by username: ${username}`);
-  try {
-    return await this.findOne({ username: username.toLowerCase() })
-      .maxTimeMS(20000) // Set maximum execution time to 20 seconds
-      .exec();
-  } catch (error) {
-    debug(`Error finding user by username: ${error}`);
-    throw error;
-  }
-};
-
-userSchema.statics.findOrCreateGitHubUser = async function(profile) {
-  debug(`Finding or creating GitHub user: ${profile.username}`);
-  try {
-    let user = await this.findOne({ githubId: profile.id }).maxTimeMS(20000);
-    if (user) {
-      debug(`Existing GitHub user found: ${user.username}`);
-      return user;
-    }
-    user = new this({
-      username: profile.username.toLowerCase(),
-      githubId: profile.id,
-      authType: 'github'
-    });
-    await user.save();
-    debug(`New GitHub user created: ${user.username}`);
-    return user;
-  } catch (error) {
-    debug(`Error finding or creating GitHub user: ${error}`);
-    throw error;
-  }
-};
-
-const User = mongoose.models.User || mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
 module.exports = User;
+
 
 
 

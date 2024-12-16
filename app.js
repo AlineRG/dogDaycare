@@ -233,6 +233,7 @@ app.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] 
 app.get('/auth/github/callback', 
   passport.authenticate('github', { failureRedirect: '/login' }),
   function(req, res) {
+    debug('GitHub authentication successful, redirecting to home');
     res.redirect('/home');
   }
 );
@@ -281,6 +282,7 @@ mongoose.connect(configurations.ConnectionStrings.MongoDB, mongooseOptions)
     console.error('Error connecting to MongoDB:', err);
     process.exit(1);
   });
+
 
 
 
